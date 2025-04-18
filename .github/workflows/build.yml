@@ -19,7 +19,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Setup Environment Variables
-      shell: pwsh
+      shell: powershell
       run: |
         "UE_ENGINE_PATH=D:\Software\UE_5.4" | Out-File -FilePath $env:GITHUB_ENV -Append
         "PROJECT_PATH=${{ github.workspace }}\ErethiaUnreal.uproject" | Out-File -FilePath $env:GITHUB_ENV -Append
