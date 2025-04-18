@@ -29,27 +29,17 @@ jobs:
         "UE_ENGINE_PATH=D:\Software\UE_5.4" | Out-File -FilePath $env:GITHUB_ENV -Append
         "PROJECT_PATH=${{ github.workspace }}\ErethiaUnreal.uproject" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-    - name: ${{ env.BUILD_CONFIG == 'Shipping' && 'Cook & Package (Shipping)' || 'Skipped (Running Dev Build)' }}
-      if: env.BUILD_CONFIG == 'Shipping'
+    - name: Cook & Package (${{ env.BUILD_CONFIG }})
       shell: cmd
       run: |
+        set FLAGS=-NoCompile -nocompileeditor -cook -allmaps -build -stage -pak -archive
+        if "%BUILD_CONFIG%"=="Shipping" set FLAGS=%FLAGS% -compressed -prereqs -nodebuginfo
         "%UE_ENGINE_PATH%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun ^
           -project="%PROJECT_PATH%" ^
-          -noP4 -platform=Win64 -clientconfig=Shipping -serverconfig=Shipping ^
-          -nocompileeditor ^
-          -cook -allmaps -compressed -build -stage -pak -archive -prereqs -nodebuginfo ^
-          -archivedirectory="%GITHUB_WORKSPACE%\BuildRelease"
-
-    - name: ${{ env.BUILD_CONFIG == 'Development' && 'Cook & Package (Development)' || 'Skipped (Running Release Build)' }}
-      if: env.BUILD_CONFIG == 'Development'
-      shell: cmd
-      run: |
-        "%UE_ENGINE_PATH%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun ^
-          -project="%PROJECT_PATH%" ^
-          -noP4 -platform=Win64 -clientconfig=Development -serverconfig=Development ^
-          -nocompileeditor ^
-          -cook -allmaps -build -stage -pak -archive ^
-          -archivedirectory="%GITHUB_WORKSPACE%\BuildDev"
+          -noP4 -platform=Win64 ^
+          -clientconfig=%BUILD_CONFIG% -serverconfig=%BUILD_CONFIG% ^
+          %FLAGS% ^
+          -archivedirectory="%GITHUB_WORKSPACE%\Build%BUILD_CONFIG%"
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
