@@ -10,6 +10,9 @@ jobs:
   build:
     name: Build Project
     runs-on: [self-hosted, windows]
+    permissions:
+      actions: read
+      contents: read
 
     steps:
     - name: Checkout Repository
@@ -41,3 +44,4 @@ jobs:
       with:
         name: UE5-Build
         path: BuildOutput
+        if-no-files-found: warn
