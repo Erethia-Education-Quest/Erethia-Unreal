@@ -19,14 +19,15 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Setup Environment Variables
+      shell: cmd
       run: |
-        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-        $Env:UE_ENGINE_PATH="D:\Software\UE_5.4" # Chemin d'Unreal Engine
-        $Env:PROJECT_PATH="${{ github.workspace }}\ErethiaUnreal.uproject"
+        set UE_ENGINE_PATH=D:\Software\UE_5.4
+        set PROJECT_PATH=%GITHUB_WORKSPACE%\ErethiaUnreal.uproject
 
     - name: Generate Project Files
+      shell: cmd
       run: |
-        & "$Env:UE_ENGINE_PATH\Engine\Build\BatchFiles\GenerateProjectFiles.bat" $Env:PROJECT_PATH
+        "%UE_ENGINE_PATH%\Engine\Build\BatchFiles\GenerateProjectFiles.bat" "%PROJECT_PATH%"
 
     - name: Build Project (Development)
       run: |
