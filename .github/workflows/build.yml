@@ -20,6 +20,7 @@ jobs:
 
     - name: Setup Environment Variables
       run: |
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
         $Env:UE_ENGINE_PATH="D:\Software\UE_5.4" # Chemin d'Unreal Engine
         $Env:PROJECT_PATH="${{ github.workspace }}\ErethiaUnreal.uproject"
 
