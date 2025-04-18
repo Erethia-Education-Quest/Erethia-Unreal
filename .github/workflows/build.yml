@@ -29,11 +29,6 @@ jobs:
         "UE_ENGINE_PATH=D:\Software\UE_5.4" | Out-File -FilePath $env:GITHUB_ENV -Append
         "PROJECT_PATH=${{ github.workspace }}\ErethiaUnreal.uproject" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-    - name: Build Unreal Editor
-      shell: cmd
-      run: |
-        "%UE_ENGINE_PATH%\Engine\Build\BatchFiles\Build.bat" ErethiaUnrealEditor Win64 Development -project="%PROJECT_PATH%" -waitmutex
-
     - name: Cook & Package (${{ env.BUILD_CONFIG }})
       shell: cmd
       run: |
