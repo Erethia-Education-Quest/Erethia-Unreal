@@ -40,7 +40,7 @@ jobs:
           -archivedirectory="${{ github.workspace }}\BuildOutput"
 
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: UE5-Build
         path: BuildOutput
