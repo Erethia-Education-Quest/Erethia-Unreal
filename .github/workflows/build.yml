@@ -1,0 +1,43 @@
+name: Build UE5 Project
+
+on:
+  push:
+    branches: [ main, project-build ]
+  pull_request:
+    branches: [ main, project-build ]
+
+jobs:
+  build:
+    name: Build Project
+    runs-on: [self-hosted, windows]
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup Environment Variables
+      run: |
+        $Env:UE_ENGINE_PATH="D:\Software\UE_5.4" # Chemin d'Unreal Engine
+        $Env:PROJECT_PATH="${{ github.workspace }}\ErethiaUnreal.uproject"
+
+    - name: Generate Project Files
+      run: |
+        & "$Env:UE_ENGINE_PATH\Engine\Build\BatchFiles\GenerateProjectFiles.bat" $Env:PROJECT_PATH
+
+    - name: Build Project (Development)
+      run: |
+        & "$Env:UE_ENGINE_PATH\Engine\Build\BatchFiles\Build.bat" ErethiaUnrealEditor Win64 Development "$Env:PROJECT_PATH"
+
+    - name: Package Project
+      run: |
+        & "$Env:UE_ENGINE_PATH\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun ^
+          -project="$Env:PROJECT_PATH" ^
+          -noP4 -platform=Win64 -clientconfig=Development -serverconfig=Development ^
+          -cook -allmaps -build -stage -pak -archive ^
+          -archivedirectory="${{ github.workspace }}\BuildOutput"
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: UE5-Build
+        path: BuildOutput
