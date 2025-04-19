@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    name: Blueprint Tests
+    name: Blueprint Testing
     runs-on: [self-hosted, windows]
     permissions:
       actions: read
