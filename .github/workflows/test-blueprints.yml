@@ -30,7 +30,7 @@ jobs:
           "${Env:PROJECT_PATH}" `
           -ExecCmds="Automation RunTests Project" `
           -TestExit="Automation Test Queue Empty" `
-          -unattended -nopause -nullrhi -noXR `
+          -unattended -nopause -nullrhi -noXR -noHMD `
           *> $testLog
 
         if (Select-String -Path $testLog -Pattern "No automation tests found" -Quiet) {
