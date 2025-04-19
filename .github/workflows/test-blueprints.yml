@@ -42,7 +42,7 @@ jobs:
             Write-Error "❌ Tests failed with exit code : $exitCode."
             exit $exitCode
           }
-        }}
+        }
 
     - name: Upload Logs
       if: always()
