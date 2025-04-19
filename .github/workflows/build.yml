@@ -15,7 +15,6 @@ env:
 
 jobs:
   build:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Build Project
     runs-on: [self-hosted, windows]
     permissions:
