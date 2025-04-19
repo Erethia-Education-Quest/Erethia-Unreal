@@ -37,7 +37,7 @@ jobs:
     - name: Cook & Package (${{ env.BUILD_CONFIG }})
       shell: cmd
       run: |
-        set FLAGS=-NoCompile -nocompileeditor -cook -allmaps -build -stage -pak -archive
+        set FLAGS=-cook -allmaps -build -stage -pak -archive
         if "%BUILD_CONFIG%"=="Shipping" set FLAGS=%FLAGS% -compressed -prereqs -nodebuginfo
         "%UE_ENGINE_PATH%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun ^
           -project="%PROJECT_PATH%" ^
