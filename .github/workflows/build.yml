@@ -32,7 +32,7 @@ jobs:
     - name: Build Unreal Engine Editor (Blueprint Projects)
       shell: cmd
       run: |
-        "%UE_ENGINE_PATH%\Engine\Build\BatchFiles\Build.bat" UnrealEditor Win64 Development
+        "%UE_ENGINE_PATH%\Engine\Build\BatchFiles\Build.bat" ErethiaUnrealEditor Win64 %BUILD_CONFIG% -project="%PROJECT_PATH%"
 
     - name: Cook & Package (${{ env.BUILD_CONFIG }})
       shell: cmd
