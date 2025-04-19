@@ -6,10 +6,8 @@ on:
   pull_request:
     branches: [ main, project-build ]
 
-# Je vais changer ça après pour qu'on puisse build en release sur main
-# et en dev sur project-build ou une autre branche
 env:
-  BUILD_CONFIG: Development  # Development/Shipping
+  BUILD_CONFIG: ${{ github.ref_name == 'main' && 'Shipping' || 'Development' }}
 
 jobs:
   build:
