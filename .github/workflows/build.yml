@@ -1,16 +1,22 @@
 name: Build UE5 Project
 
 on:
-  push:
-    branches: [ main, project-build ]
-  pull_request:
-    branches: [ main, project-build ]
+  workflow_run:
+    workflows: ["Blueprint Testing"]
+    types:
+      - completed
 
 env:
   BUILD_CONFIG: ${{ github.ref_name == 'main' && 'Shipping' || 'Development' }}
 
 jobs:
   build:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      (
+        github.event.workflow_run.head_branch == 'main' ||
+        github.event.workflow_run.head_branch == 'project-build'
+      )
     name: Build Project
     runs-on: [self-hosted, windows]
     permissions:

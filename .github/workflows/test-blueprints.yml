@@ -30,7 +30,7 @@ jobs:
           "${Env:PROJECT_PATH}" `
           -ExecCmds="Automation RunTests Project" `
           -TestExit="Automation Test Queue Empty" `
-          -unattended -nopause -nullrhi `
+          -unattended -nopause -nullrhi -noXR `
           *> $testLog
 
         if (Select-String -Path $testLog -Pattern "No automation tests found" -Quiet) {
@@ -42,7 +42,7 @@ jobs:
             Write-Error "❌ Tests failed with exit code : $exitCode."
             exit $exitCode
           }
-        }
+        }}
 
     - name: Upload Logs
       if: always()
