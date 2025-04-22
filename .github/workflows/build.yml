@@ -28,8 +28,12 @@ jobs:
     - name: Setup Environment Variables
       shell: powershell
       run: |
-        "UE_ENGINE_PATH=$Env:UE_ENGINE_PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "UE_ENGINE_PATH=$($Env:UE_ENGINE_PATH)" | Out-File -FilePath $env:GITHUB_ENV -Append
         "PROJECT_PATH=${{ github.workspace }}\ErethiaUnreal.uproject" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+    - name: Show resolved Unreal Engine path
+      shell: powershell
+      run: echo "🎮 UE_ENGINE_PATH: $Env:UE_ENGINE_PATH"
 
     - name: Build Unreal Engine Editor (Blueprint Projects)
       shell: cmd
