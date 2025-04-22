@@ -34,7 +34,7 @@ jobs:
     - name: Show resolved Unreal Engine path
       shell: powershell
       run: |
-        Write-Host "UE_ENGINE_PATH: $Env:UE_ENGINE_PATH"
+        Write-Host "Env var UE_ENGINE_PATH: $Env:UE_ENGINE_PATH"
 
     - name: Build Unreal Engine Editor (Blueprint Projects)
       shell: cmd
