@@ -24,7 +24,7 @@ jobs:
 
     - name: Show resolved Unreal Engine path
       shell: powershell
-      run: echo "🎮 UE_ENGINE_PATH: $Env:UE_ENGINE_PATH"
+      run: echo "UE_ENGINE_PATH: $Env:UE_ENGINE_PATH"
 
     - name: Run Blueprint Automation Tests
       shell: powershell
