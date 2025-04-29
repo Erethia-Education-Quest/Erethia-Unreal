@@ -5,6 +5,12 @@ on:
     - cron: '0 12 * * 4' # Every thursday 1pm UTC (10pm KST)
   workflow_dispatch: # To run by hand in case of problems
 
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+
 jobs:
   weekly-iteration:
     runs-on: ubuntu-latest
