@@ -1,0 +1,64 @@
+name: Build UE5 Project
+
+on:
+  workflow_run:
+      workflows: ["Blueprint Testing"]
+      types:
+        - completed
+  push:
+    branches: [ main, project-build ]
+  pull_request:
+    branches: [ main, project-build ]
+
+env:
+  BUILD_CONFIG: ${{ github.ref_name == 'main' && 'Shipping' || 'Development' }}
+
+jobs:
+  build:
+    name: Build Project
+    runs-on: [self-hosted, windows]
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup Environment Variables
+      shell: powershell
+      run: |
+        "UE_ENGINE_PATH=$($Env:UE_ENGINE_PATH)" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "PROJECT_PATH=${{ github.workspace }}\ErethiaUnreal.uproject" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+    - name: Show resolved Unreal Engine path
+      shell: powershell
+      run: |
+        Write-Host "Env var UE_ENGINE_PATH: $Env:UE_ENGINE_PATH"
+
+    - name: Build Unreal Engine Editor (Blueprint Projects)
+      shell: cmd
+      run: |
+        "%UE_ENGINE_PATH%\Engine\Build\BatchFiles\Build.bat" ErethiaUnrealEditor Win64 %BUILD_CONFIG% -project="%PROJECT_PATH%"
+
+    - name: Cook & Package (${{ env.BUILD_CONFIG }})
+      shell: cmd
+      run: |
+        set FLAGS=-nocompileeditor -cook -allmaps -build -stage -pak -archive
+        if "%BUILD_CONFIG%"=="Shipping" set FLAGS=%FLAGS% -compressed -prereqs -nodebuginfo
+        "%UE_ENGINE_PATH%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun ^
+          -project="%PROJECT_PATH%" ^
+          -noP4 -platform=Win64 ^
+          -clientconfig=%BUILD_CONFIG% -serverconfig=%BUILD_CONFIG% ^
+          %FLAGS% ^
+          -archivedirectory="%GITHUB_WORKSPACE%\Build%BUILD_CONFIG%"
+
+    - name: List files in build folder
+      run: |
+        dir Build${{ env.BUILD_CONFIG }}\Windows\*
+
+    - name: Upload Packaged Build
+      uses: actions/upload-artifact@v4
+      with:
+        name: Packaged-Build-${{ env.BUILD_CONFIG }}
+        path: Build${{ env.BUILD_CONFIG }}

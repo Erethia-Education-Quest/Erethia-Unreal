@@ -1,0 +1,61 @@
+name: Blueprint Testing
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Blueprint Testing
+    runs-on: [self-hosted, windows]
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup Environment Variables
+      shell: powershell
+      run: |
+        "UE_ENGINE_PATH=$($Env:UE_ENGINE_PATH)" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "PROJECT_PATH=${{ github.workspace }}\ErethiaUnreal.uproject" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+    - name: Show resolved Unreal Engine path
+      shell: powershell
+      run: |
+        Write-Host "Env var UE_ENGINE_PATH: $Env:UE_ENGINE_PATH"
+
+    - name: Run Blueprint Automation Tests
+      shell: powershell
+      run: |
+        $testLog = "test_output.log"
+        & "${Env:UE_ENGINE_PATH}\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" `
+          "${Env:PROJECT_PATH}" `
+          -ExecCmds="Automation RunTests Project" `
+          -TestExit="Automation Test Queue Empty" `
+          -unattended -nopause -nullrhi -noXR -noHMD `
+          *> $testLog
+
+        if (Select-String -Path $testLog -Pattern "No automation tests found" -Quiet) {
+          Write-Host "⚠️ No test found, skipping."
+        } else {
+          Write-Host "✅ Tests found, running."
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) {
+            Write-Error "❌ Tests failed with exit code : $exitCode."
+            exit $exitCode
+          }
+        }
+
+    - name: Upload Logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: automation-logs
+        path: |
+          Saved/Logs
+          **/Automation/Logs/*
+          test_output.log
+
