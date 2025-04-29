@@ -58,7 +58,6 @@ jobs:
           fi
 
       - name: Create Pull Request from previous iteration branch to Dev
-        if: env.exists == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -75,7 +74,7 @@ jobs:
 
             console.log(`✅ Created PR #${pullRequest.number}: ${title}`);
 
-            - name: List old iteration branches (to delete)
+      - name: List old iteration branches (to delete)
         run: |
           echo "🔍 Listing iteration branches candidates for deletion..."
 
