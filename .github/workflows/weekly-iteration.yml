@@ -1,4 +1,4 @@
-name: Weekly Iteration Branch and PR
+name: Weekly Iteration
 
 on:
   schedule:
