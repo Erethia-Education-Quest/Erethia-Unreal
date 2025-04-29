@@ -71,7 +71,7 @@ jobs:
       - name: Create Pull Request from previous iteration branch to Dev
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.ORG_PAT }}
           script: |
             const title = `Weekly Iteration Review: ${process.env.previous_branch_name} → Dev`;
             const { data: pullRequest } = await github.rest.pulls.create({
