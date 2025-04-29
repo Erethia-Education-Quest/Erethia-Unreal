@@ -39,6 +39,11 @@ jobs:
           echo "branch_name=iteration-${today}-to-${next_thursday}" >> $GITHUB_ENV
           echo "previous_branch_name=iteration-${last_thursday}-to-${today}" >> $GITHUB_ENV
 
+      - name: Debug Authentication
+        run: |
+          echo "Checking authentication..."
+          git config --get-regexp url
+
       - name: Create new iteration branch (fallback)
         run: |
           git fetch origin
