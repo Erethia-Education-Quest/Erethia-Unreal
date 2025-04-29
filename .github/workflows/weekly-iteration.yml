@@ -1,0 +1,99 @@
+name: Weekly Iteration
+
+on:
+  schedule:
+    - cron: '0 12 * * 4' # Every thursday 1pm UTC (10pm KST)
+  workflow_dispatch: # To run by hand in case of problems
+
+jobs:
+  weekly-iteration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Authenticate with ORG_PAT
+        run: |
+          git config --global url."https://${{ secrets.ORG_PAT }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Setup Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Calculate branch names
+        id: dates
+        run: |
+          # Set KST timezone (UTC+9)
+          export TZ=Asia/Seoul
+
+          today=$(date '+%d/%m')
+          next_thursday=$(date -d 'next Thursday' '+%d/%m')
+          last_thursday=$(date -d 'last Thursday' '+%d/%m')
+
+          echo "today=$today"
+          echo "next_thursday=$next_thursday"
+          echo "last_thursday=$last_thursday"
+
+          echo "branch_name=iteration-${today}-to-${next_thursday}" >> $GITHUB_ENV
+          echo "previous_branch_name=iteration-${last_thursday}-to-${today}" >> $GITHUB_ENV
+
+      - name: Create new iteration branch
+        run: |
+          git fetch origin
+          git checkout -b $branch_name origin/Dev
+          git push origin $branch_name
+          echo "✅ Created new branch: $branch_name"
+
+      - name: Check if previous iteration branch exists
+        id: check_previous_branch
+        run: |
+          if git ls-remote --heads origin $previous_branch_name | grep $previous_branch_name; then
+            echo "exists=true" >> $GITHUB_ENV
+            echo "✅ Previous branch $previous_branch_name found."
+          else
+            echo "exists=false" >> $GITHUB_ENV
+            echo "⚠️ Previous branch $previous_branch_name NOT found."
+          fi
+
+      - name: Create Pull Request from previous iteration branch to Dev
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const title = `Weekly Iteration Review: ${process.env.previous_branch_name} → Dev`;
+            const { data: pullRequest } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: process.env.previous_branch_name,
+              base: 'Dev',
+              title: title,
+              body: 'Automatic PR for weekly iteration review.'
+            });
+
+            console.log(`✅ Created PR #${pullRequest.number}: ${title}`);
+
+      - name: List old iteration branches (to delete)
+        run: |
+          echo "🔍 Listing iteration branches candidates for deletion..."
+
+          # Last week dates
+          export TZ=Asia/Seoul
+          last_thursday=$(date -d 'last Thursday' '+%s')
+          this_thursday=$(date '+%s')
+
+          echo "🗓️ Week from $(date -d @$last_thursday '+%d/%m') to $(date -d @$this_thursday '+%d/%m')"
+
+          git fetch --all --quiet
+          git for-each-ref --format='%(refname:short)' refs/remotes/origin/ | grep '^iteration-' | while read branch; do
+            # Ex : iteration-18/04-to-25/04
+            start_date=$(echo "$branch" | cut -d'-' -f2 | tr -d ' ')
+            day=$(echo $start_date | cut -d'/' -f1)
+            month=$(echo $start_date | cut -d'/' -f2)
+            branch_date_epoch=$(date -d "$month/$day" '+%s' 2>/dev/null || echo 0)
+
+            if [ $branch_date_epoch -ge $last_thursday ] && [ $branch_date_epoch -lt $this_thursday ]; then
+              echo "🗑️ Branch candidate for deletion: $branch"
+            fi
+          done
