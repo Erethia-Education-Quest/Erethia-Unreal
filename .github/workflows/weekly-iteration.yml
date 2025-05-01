@@ -5,6 +5,12 @@ on:
     - cron: '0 12 * * 4' # Every thursday 1pm UTC (10pm KST)
   workflow_dispatch: # To run by hand in case of problems
 
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+
 jobs:
   weekly-iteration:
     runs-on: ubuntu-latest
@@ -39,11 +45,16 @@ jobs:
           echo "branch_name=iteration-${today}-to-${next_thursday}" >> $GITHUB_ENV
           echo "previous_branch_name=iteration-${last_thursday}-to-${today}" >> $GITHUB_ENV
 
-      - name: Create new iteration branch
+      - name: Debug Authentication
+        run: |
+          echo "Checking authentication..."
+          git config --get-regexp url
+
+      - name: Create new iteration branch (fallback)
         run: |
           git fetch origin
           git checkout -b $branch_name origin/Dev
-          git push origin $branch_name
+          git push https://${{ secrets.ORG_PAT }}@github.com/Erethia-Education-Quest/Erethia-Unreal.git $branch_name
           echo "✅ Created new branch: $branch_name"
 
       - name: Check if previous iteration branch exists
@@ -60,7 +71,7 @@ jobs:
       - name: Create Pull Request from previous iteration branch to Dev
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.ORG_PAT }}
           script: |
             const title = `Weekly Iteration Review: ${process.env.previous_branch_name} → Dev`;
             const { data: pullRequest } = await github.rest.pulls.create({
