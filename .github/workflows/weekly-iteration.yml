@@ -2,7 +2,7 @@ name: Weekly Iteration
 
 on:
   schedule:
-    - cron: '0 7 * * 4' # Every thursday (5pm KST)
+    - cron: '30 11 * * 4' # Every thursday (9:30pm KST)
   workflow_dispatch: # To run by hand in case of problems
 
 permissions:
